@@ -18,19 +18,18 @@ def get_used_quest_ids() -> None:
         quest_ids_file.write("\n".join(sorted(quest_ids, key=int)))
 
 
-def OpenAndStripLineToolsFile(thing, build):
-    path = "https://wow.tools/dbc/api/export/?name="
-    url = path + thing + "&build=" + build
+def OpenAndStripLineToolsFile(build: str):
+    url = f"https://wow.tools/dbc/api/export/?name=questv2&build={build}"
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.76 Safari/537.36"
     }
-    csvname = thing + ".csv"
-    r = requests.get(url, headers=headers)  # create HTTP response object
+    r = requests.get(url, headers=headers)
+    csvname = "questv2.csv"
     with open(csvname, "wb") as f:
         f.write(r.content)
         f.close()
     TOOL = open(csvname)
-    newname = "NewTool" + thing + ".txt"
+    newname = "NewToolquestv2.txt"
     TOOLNew = open(newname, "w")
     count = 0
     old = 0
@@ -113,7 +112,7 @@ def main():
     for Build in reversed(build_list):
         Difference = open("Difference.txt", "r+")
         print(Build)
-        TOOLname = OpenAndStripLineToolsFile("questv2", Build)
+        TOOLname = OpenAndStripLineToolsFile(Build)
         diff(ATTname, TOOLname, Removable, Build, Difference)
         Difference.close()
 
