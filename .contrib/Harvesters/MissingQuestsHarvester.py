@@ -4,6 +4,7 @@ import re
 import requests
 
 DB_FILE = "db/Categories.lua"
+BUILDS_FILE = ".contrib/Harvesters/builds.txt"
 
 
 def OpenAndStripLineATTFile(name):
@@ -38,7 +39,7 @@ def get_used_quest_ids() -> None:
 
 
 def BuildList():
-    ATT = open("BuilderQuest.txt")
+    ATT = open(BUILDS_FILE)
     Buildlist = []
     for line in ATT.readlines():
         try:
