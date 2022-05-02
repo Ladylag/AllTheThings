@@ -26,6 +26,17 @@ def OpenAndStripLineATTFile(name):
     return newname
 
 
+def get_used_quest_ids() -> None:
+    quest_ids = set[str]()
+    with open(DB_FILE) as categories_lua:
+        for line in categories_lua:
+            for element in line.split(","):
+                if match := re.search(r"(?:q\(|questID=)(\d+)", element):
+                    quest_ids.add(match.group(1))
+    with open("quest_ids.txt", "w") as quest_ids_file:
+        quest_ids_file.writelines("\n".join(sorted(quest_ids, key=int)))
+
+
 def BuildList():
     ATT = open("BuilderQuest.txt")
     Buildlist = []
@@ -128,6 +139,7 @@ def diff(ATTname, TOOLname, Removable, Build, Difference):
 
 def main():
     ATTname = OpenAndStripLineATTFile("Categories")
+    get_used_quest_ids()
     Removable = []  ##Divine Steeds + Extra
     Difference = open("Difference.txt", "w")
     Difference.close()
