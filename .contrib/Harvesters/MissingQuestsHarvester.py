@@ -7,10 +7,10 @@ BUILDS_FILE = ".contrib/Harvesters/builds.txt"
 DIFF_FILE = "diff.txt"
 
 
-def get_used_quest_ids() -> set[str]:
+def get_quest_ids(filepath: str) -> set[str]:
     quest_ids = set[str]()
-    with open(DB_FILE) as categories_lua:
-        for line in categories_lua:
+    with open(filepath) as quests_file:
+        for line in quests_file:
             for element in line.split(","):
                 if match := re.search(r"(?:q\(|questID=)(\d+)", element):
                     quest_ids.add(match.group(1))
@@ -39,7 +39,7 @@ def build_diff(used_quests: set[str], build: str, build_quests: set[str]) -> Non
 
 
 def main() -> None:
-    used_quest_ids = get_used_quest_ids()
+    used_quest_ids = get_quest_ids(DB_FILE)
     open(DIFF_FILE, "w").close()
     build_list = open(BUILDS_FILE).read().splitlines()
     for build in reversed(build_list):
@@ -74,7 +74,7 @@ def OpenAndStripLineMissing(name):
 
 
 def CheckMissing():
-    get_used_quest_ids()
+    get_quest_ids()
     ATT = open(USED_QUESTS_FILE)
     TOOLname = OpenAndStripLineMissing("MissingQuests")
     TOOL = open(TOOLname)
