@@ -5,6 +5,7 @@ import requests
 DB_FILE = "db/Categories.lua"
 BUILDS_FILE = ".contrib/Harvesters/builds.txt"
 USED_QUESTS_FILE = "quest_ids.txt"
+BUILD_QUESTS_FILE = "build_quests.txt"
 
 
 def get_used_quest_ids() -> None:
@@ -19,27 +20,23 @@ def get_used_quest_ids() -> None:
         quest_ids_file.write("\n")
 
 
-def OpenAndStripLineToolsFile(build: str):
+def get_build_quests(build: str) -> None:
     url = f"https://wow.tools/dbc/api/export/?name=questv2&build={build}"
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.76 Safari/537.36"
     }
-    r = requests.get(url, headers=headers)
-    csvname = "questv2.csv"
-    with open(csvname, "wb") as f:
-        f.write(r.content)
-    newname = "NewToolquestv2.txt"
-    with open(newname, "w") as TOOLNew, open(csvname) as TOOL:
-        quests = map(lambda x: x.split(",")[0], TOOL.read().splitlines()[1:])
-        TOOLNew.write("\n".join(quests))
-        TOOLNew.write("\n")
-    return newname
+    request = requests.get(url, headers=headers)
+    lines = request.text.splitlines()[1:]
+    with open(BUILD_QUESTS_FILE, "w") as build_quests_file:
+        quests = map(lambda x: x.split(",")[0], lines)
+        build_quests_file.write("\n".join(quests))
+        build_quests_file.write("\n")
 
 
-def diff(used_quests_path: str, wowtools_path: str, build: str, diff_path: str) -> None:
+def diff(used_quests_path: str, build: str, diff_path: str) -> None:
     with (
         open(used_quests_path) as used_quests_file,
-        open(wowtools_path) as build_quests_file,
+        open(BUILD_QUESTS_FILE) as build_quests_file,
         open(diff_path) as diff_file,
     ):
         used_quests = set(used_quests_file.read().splitlines())
@@ -61,8 +58,8 @@ def main():
     build_list = open(BUILDS_FILE).read().splitlines()
     for Build in reversed(build_list):
         print(Build)
-        TOOLname = OpenAndStripLineToolsFile(Build)
-        diff(USED_QUESTS_FILE, TOOLname, Build, "Difference.txt")
+        get_build_quests(Build)
+        diff(USED_QUESTS_FILE, Build, "Difference.txt")
 
 
 main()
