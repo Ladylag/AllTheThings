@@ -37,45 +37,21 @@ def OpenAndStripLineToolsFile(build: str):
     return newname
 
 
-def FileEmpty(name):
-    with open(name) as my_file:
-        my_file.seek(0, os.SEEK_END)  # go to end of file
-        if my_file.tell():  # if current position is truish (i.e != 0)
-            my_file.seek(0)  # rewind the file for later use
-        else:
-            return True
-
-
-def diff(ATTname, TOOLname, Removable, Build, Difference):
-    if FileEmpty(TOOLname) == True:
-        return
-    else:
-        ATTNew = open(ATTname)
-        TOOLNew = open(TOOLname)
-        ATTlines = ATTNew.readlines()
-        TOOLlines = TOOLNew.readlines()
-        Difference.write(Build + "\n")
-        Difflines = Difference.readlines()
-        for TOOLline in TOOLlines:
-            TOOLline = TOOLline.strip()
-            boolean = 2
-            for ATTline in ATTlines + Removable + Difflines:
-                ATTline = ATTline.strip()
-                if TOOLline == ATTline:
-                    boolean = 1
-                    break
-                else:
-                    boolean = 0
-            if boolean == 2:
-                print("Fick ej in i if-sats")
-            elif boolean == 1:
-                continue
-            elif boolean == 0:
-                Difference.write(TOOLline + "\n")
-            else:
-                print("Något är stört")
-        ATTNew.close()
-        TOOLNew.close()
+def diff(used_quests_path: str, wowtools_path: str, build: str, diff_path: str) -> None:
+    with (
+        open(used_quests_path) as used_quests_file,
+        open(wowtools_path) as build_quests_file,
+        open(diff_path) as diff_file,
+    ):
+        used_quests = set(used_quests_file.read().splitlines())
+        build_quests = set(build_quests_file.read().splitlines())
+        diff_stuff = set(diff_file.read().splitlines())
+        difference = build_quests - used_quests - diff_stuff
+    if difference:
+        with open(diff_path, "a") as diff_file:
+            diff_file.write(build + "\n")
+            diff_file.write("\n".join(sorted(difference, key=int)))
+            diff_file.write("\n")
 
 
 def main():
@@ -85,11 +61,9 @@ def main():
     Difference.close()
     build_list = open(BUILDS_FILE).read().splitlines()
     for Build in reversed(build_list):
-        Difference = open("Difference.txt", "r+")
         print(Build)
         TOOLname = OpenAndStripLineToolsFile(Build)
-        diff(USED_QUESTS_FILE, TOOLname, Removable, Build, Difference)
-        Difference.close()
+        diff(USED_QUESTS_FILE, TOOLname, Build, "Difference.txt")
 
 
 main()
