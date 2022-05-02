@@ -18,20 +18,6 @@ def get_used_quest_ids() -> None:
         quest_ids_file.write("\n".join(sorted(quest_ids, key=int)))
 
 
-def BuildList():
-    ATT = open(BUILDS_FILE)
-    Buildlist = []
-    for line in ATT.readlines():
-        try:
-            line = re.sub("[^0-9]+^.", "", line)
-            line = line.strip("\n")
-            Buildlist.append(line)
-        except:
-            continue
-    Buildlist.reverse()
-    return Buildlist
-
-
 def OpenAndStripLineToolsFile(thing, build):
     path = "https://wow.tools/dbc/api/export/?name="
     url = path + thing + "&build=" + build
@@ -123,8 +109,8 @@ def main():
     Removable = []  ##Divine Steeds + Extra
     Difference = open("Difference.txt", "w")
     Difference.close()
-    Buildlist = BuildList()
-    for Build in Buildlist:
+    build_list = open(BUILDS_FILE).read().splitlines()
+    for Build in reversed(build_list):
         Difference = open("Difference.txt", "r+")
         print(Build)
         TOOLname = OpenAndStripLineToolsFile("questv2", Build)
