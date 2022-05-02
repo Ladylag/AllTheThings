@@ -7,15 +7,6 @@ import requests
 DB_FILE = "db/Categories.lua"
 
 
-def FileEmpty(name):
-    with open(name) as my_file:
-        my_file.seek(0, os.SEEK_END)  # go to end of file
-        if my_file.tell():  # if current position is truish (i.e != 0)
-            my_file.seek(0)  # rewind the file for later use
-        else:
-            return True
-
-
 def OpenAndStripLineATTFile(name):
     ATT = open(DB_FILE)
     newname = "New" + name + ".txt"
@@ -34,6 +25,20 @@ def OpenAndStripLineATTFile(name):
                 continue
     ATTNew.close()
     return newname
+
+
+def BuildList():
+    ATT = open("BuilderQuest.txt")
+    Buildlist = []
+    for line in ATT.readlines():
+        try:
+            line = re.sub("[^0-9]+^.", "", line)
+            line = line.strip("\n")
+            Buildlist.append(line)
+        except:
+            continue
+    Buildlist.reverse()
+    return Buildlist
 
 
 def OpenAndStripLineToolsFile(thing, build):
@@ -81,17 +86,13 @@ def OpenAndStripLineToolsFile(thing, build):
     return newname
 
 
-def bubble_sort(nums):
-    # We set swapped to True so the loop looks runs at least once
-    swapped = True
-    while swapped:
-        swapped = False
-        for i in range(len(nums) - 1):
-            if nums[i] > nums[i + 1]:
-                # Swap the elements
-                nums[i], nums[i + 1] = nums[i + 1], nums[i]
-                # Set the flag to True so we'll loop again
-                swapped = True
+def FileEmpty(name):
+    with open(name) as my_file:
+        my_file.seek(0, os.SEEK_END)  # go to end of file
+        if my_file.tell():  # if current position is truish (i.e != 0)
+            my_file.seek(0)  # rewind the file for later use
+        else:
+            return True
 
 
 def diff(ATTname, TOOLname, Removable, Build, Difference):
@@ -124,20 +125,6 @@ def diff(ATTname, TOOLname, Removable, Build, Difference):
                 print("Något är stört")
         ATTNew.close()
         TOOLNew.close()
-
-
-def BuildList():
-    ATT = open("BuilderQuest.txt")
-    Buildlist = []
-    for line in ATT.readlines():
-        try:
-            line = re.sub("[^0-9]+^.", "", line)
-            line = line.strip("\n")
-            Buildlist.append(line)
-        except:
-            continue
-    Buildlist.reverse()
-    return Buildlist
 
 
 def main():
