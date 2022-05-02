@@ -17,7 +17,7 @@ def OpenAndStripLineATTFile(name):
                 if element.find("q(") != -1:
                     element = re.sub("[^0-9^.]", "", element)
                     ATTNew.write(element + "\n")
-                elif element.find("questID") != -1:
+                elif element.find("questID=") != -1:
                     element = re.sub("[^0-9^.]", "", element)
                     ATTNew.write(element + "\n")
             except:
