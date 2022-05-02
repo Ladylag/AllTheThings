@@ -29,38 +29,11 @@ def OpenAndStripLineToolsFile(build: str):
     csvname = "questv2.csv"
     with open(csvname, "wb") as f:
         f.write(r.content)
-        f.close()
-    TOOL = open(csvname)
     newname = "NewToolquestv2.txt"
-    TOOLNew = open(newname, "w")
-    count = 0
-    old = 0
-    for line in TOOL.readlines():
-        line = line.split(",")
-        line.reverse()
-        if count == 0:
-            length = len(line)
-            for element in line:
-                if element == "ID":
-                    if count == length:
-                        old = 1
-                        break
-                    else:
-                        break
-                count = count + 1
-        try:
-            if old == 0:
-                line = re.sub("[^0-9]", "", line[count])
-                line.strip()
-                TOOLNew.write(line + "\n")
-            else:
-                line.reverse()
-                line = re.sub("[^0-9]", "", line[0])
-                line.strip()
-                TOOLNew.write(line + "\n")
-        except:
-            continue
-    TOOLNew.close()
+    with open(newname, "w") as TOOLNew, open(csvname) as TOOL:
+        quests = map(lambda x: x.split(",")[0], TOOL.read().splitlines()[1:])
+        TOOLNew.write("\n".join(quests))
+        TOOLNew.write("\n")
     return newname
 
 
