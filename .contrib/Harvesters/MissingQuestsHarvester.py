@@ -5,6 +5,7 @@ import requests
 
 DB_FILE = "db/Categories.lua"
 BUILDS_FILE = ".contrib/Harvesters/builds.txt"
+USED_QUESTS_FILE = "quest_ids.txt"
 
 
 def get_used_quest_ids() -> None:
@@ -14,8 +15,9 @@ def get_used_quest_ids() -> None:
             for element in line.split(","):
                 if match := re.search(r"(?:q\(|questID=)(\d+)", element):
                     quest_ids.add(match.group(1))
-    with open("quest_ids.txt", "w") as quest_ids_file:
+    with open(USED_QUESTS_FILE, "w") as quest_ids_file:
         quest_ids_file.write("\n".join(sorted(quest_ids, key=int)))
+        quest_ids_file.write("\n")
 
 
 def OpenAndStripLineToolsFile(build: str):
@@ -113,7 +115,7 @@ def main():
         Difference = open("Difference.txt", "r+")
         print(Build)
         TOOLname = OpenAndStripLineToolsFile(Build)
-        diff(ATTname, TOOLname, Removable, Build, Difference)
+        diff(USED_QUESTS_FILE, TOOLname, Removable, Build, Difference)
         Difference.close()
 
 
@@ -122,7 +124,7 @@ main()
 
 def CheckAgain(Checkagain):
     get_used_quest_ids()
-    ATT = open(ATTname)
+    ATT = open(USED_QUESTS_FILE)
     TOOL = open(Checkagain)
     Diff = open("diff.txt", "w")
     TOOlr = TOOL.readlines()
@@ -159,7 +161,7 @@ def OpenAndStripLineMissing(name):
 
 def CheckMissing():
     get_used_quest_ids()
-    ATT = open(ATTname)
+    ATT = open(USED_QUESTS_FILE)
     TOOLname = OpenAndStripLineMissing("MissingQuests")
     TOOL = open(TOOLname)
     DiffMissing = open("diff.txt", "w")
