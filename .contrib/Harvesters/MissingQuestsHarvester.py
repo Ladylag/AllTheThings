@@ -7,26 +7,6 @@ DB_FILE = "db/Categories.lua"
 BUILDS_FILE = ".contrib/Harvesters/builds.txt"
 
 
-def OpenAndStripLineATTFile(name):
-    ATT = open(DB_FILE)
-    newname = "New" + name + ".txt"
-    ATTNew = open(newname, "w")
-    for line in ATT.readlines():
-        line = line.split(",")
-        for element in line:
-            try:
-                if element.find("q(") != -1:
-                    element = re.sub("[^0-9^.]", "", element)
-                    ATTNew.write(element + "\n")
-                elif element.find("questID=") != -1:
-                    element = re.sub("[^0-9^.]", "", element)
-                    ATTNew.write(element + "\n")
-            except:
-                continue
-    ATTNew.close()
-    return newname
-
-
 def get_used_quest_ids() -> None:
     quest_ids = set[str]()
     with open(DB_FILE) as categories_lua:
@@ -139,7 +119,6 @@ def diff(ATTname, TOOLname, Removable, Build, Difference):
 
 
 def main():
-    ATTname = OpenAndStripLineATTFile("Categories")
     get_used_quest_ids()
     Removable = []  ##Divine Steeds + Extra
     Difference = open("Difference.txt", "w")
@@ -157,7 +136,7 @@ main()
 
 
 def CheckAgain(Checkagain):
-    ATTname = OpenAndStripLineATTFile("Categories")
+    get_used_quest_ids()
     ATT = open(ATTname)
     TOOL = open(Checkagain)
     Diff = open("diff.txt", "w")
@@ -194,7 +173,7 @@ def OpenAndStripLineMissing(name):
 
 
 def CheckMissing():
-    ATTname = OpenAndStripLineATTFile("Categories")
+    get_used_quest_ids()
     ATT = open(ATTname)
     TOOLname = OpenAndStripLineMissing("MissingQuests")
     TOOL = open(TOOLname)
