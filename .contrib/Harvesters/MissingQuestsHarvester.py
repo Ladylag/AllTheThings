@@ -51,21 +51,6 @@ def main() -> None:
 main()
 
 
-def CheckAgain(Checkagain):
-    get_used_quest_ids()
-    ATT = open(USED_QUESTS_FILE)
-    TOOL = open(Checkagain)
-    Diff = open("diff.txt", "w")
-    TOOlr = TOOL.readlines()
-    ATTr = ATT.readlines()
-    for TOOLline in TOOlr:
-        TOOLline = TOOLline.strip()
-        for ATTline in ATTr:
-            ATTline = ATTline.strip()
-            if TOOLline == ATTline:
-                Diff.write(TOOLline + "\n")
-
-
 def OpenAndStripLineMissing(name):
     data_folder = "C:\\Program Files (x86)\\World of Warcraft\\_retail_\\Interface\\AddOns\\AllTheThings\\.contrib\\Parser\\DATAS\\00 - Item Database\\"
     path = data_folder + name + ".lua"
