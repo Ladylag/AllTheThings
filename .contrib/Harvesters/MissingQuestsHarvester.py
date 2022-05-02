@@ -34,7 +34,7 @@ def get_used_quest_ids() -> None:
                 if match := re.search(r"(?:q\(|questID=)(\d+)", element):
                     quest_ids.add(match.group(1))
     with open("quest_ids.txt", "w") as quest_ids_file:
-        quest_ids_file.writelines("\n".join(sorted(quest_ids, key=int)))
+        quest_ids_file.write("\n".join(sorted(quest_ids, key=int)))
 
 
 def BuildList():
