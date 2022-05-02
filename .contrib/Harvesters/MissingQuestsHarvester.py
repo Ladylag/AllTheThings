@@ -1,23 +1,24 @@
-import re
-import requests
 import csv
 import os
+import re
 
+import requests
 
 
 def FileEmpty(name):
     with open(name) as my_file:
-        my_file.seek(0, os.SEEK_END) # go to end of file
-        if my_file.tell(): # if current position is truish (i.e != 0)
-            my_file.seek(0) # rewind the file for later use
+        my_file.seek(0, os.SEEK_END)  # go to end of file
+        if my_file.tell():  # if current position is truish (i.e != 0)
+            my_file.seek(0)  # rewind the file for later use
         else:
             return True
 
+
 def OpenAndStripLineATTFile(name):
     data_folder = "C:\\Program Files (x86)\\World of Warcraft\\_retail_\\Interface\\AddOns\\AllTheThings\\db\\"
-    path = data_folder + name+".lua"
-    ATT = open(path, "r")
-    newname = "New"+name+".txt"
+    path = data_folder + name + ".lua"
+    ATT = open(path)
+    newname = "New" + name + ".txt"
     ATTNew = open(newname, "w")
     for line in ATT.readlines():
         line = line.split(",")
@@ -25,26 +26,29 @@ def OpenAndStripLineATTFile(name):
             try:
                 if element.find("q(") != -1:
                     element = re.sub("[^0-9^.]", "", element)
-                    ATTNew.write(element+"\n")
+                    ATTNew.write(element + "\n")
                 elif element.find("questID") != -1:
                     element = re.sub("[^0-9^.]", "", element)
-                    ATTNew.write(element+"\n")
+                    ATTNew.write(element + "\n")
             except:
                 continue
     ATTNew.close()
     return newname
 
+
 def OpenAndStripLineToolsFile(thing, build):
-    path = 'https://wow.tools/dbc/api/export/?name='
-    url = path+thing+'&build='+build
-    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.76 Safari/537.36'}
-    csvname = thing+".csv"
-    r = requests.get(url, headers=headers) # create HTTP response object
-    with open(csvname,'wb') as f:
+    path = "https://wow.tools/dbc/api/export/?name="
+    url = path + thing + "&build=" + build
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.76 Safari/537.36"
+    }
+    csvname = thing + ".csv"
+    r = requests.get(url, headers=headers)  # create HTTP response object
+    with open(csvname, "wb") as f:
         f.write(r.content)
         f.close()
-    TOOL = open(csvname, "r")
-    newname = "NewTool"+thing+".txt"
+    TOOL = open(csvname)
+    newname = "NewTool" + thing + ".txt"
     TOOLNew = open(newname, "w")
     count = 0
     old = 0
@@ -63,14 +67,14 @@ def OpenAndStripLineToolsFile(thing, build):
                 count = count + 1
         try:
             if old == 0:
-                line = re.sub('[^0-9]','', line[count])
+                line = re.sub("[^0-9]", "", line[count])
                 line.strip()
-                TOOLNew.write(line+"\n")
+                TOOLNew.write(line + "\n")
             else:
                 line.reverse()
-                line = re.sub('[^0-9]','', line[0])
+                line = re.sub("[^0-9]", "", line[0])
                 line.strip()
-                TOOLNew.write(line+"\n")
+                TOOLNew.write(line + "\n")
         except:
             continue
     TOOLNew.close()
@@ -94,16 +98,16 @@ def diff(ATTname, TOOLname, Removable, Build, Difference):
     if FileEmpty(TOOLname) == True:
         return
     else:
-        ATTNew = open(ATTname, "r")
-        TOOLNew = open(TOOLname, "r")
+        ATTNew = open(ATTname)
+        TOOLNew = open(TOOLname)
         ATTlines = ATTNew.readlines()
         TOOLlines = TOOLNew.readlines()
-        Difference.write(Build+"\n")
+        Difference.write(Build + "\n")
         Difflines = Difference.readlines()
         for TOOLline in TOOLlines:
             TOOLline = TOOLline.strip()
             boolean = 2
-            for ATTline in ATTlines+Removable+Difflines:
+            for ATTline in ATTlines + Removable + Difflines:
                 ATTline = ATTline.strip()
                 if TOOLline == ATTline:
                     boolean = 1
@@ -115,25 +119,25 @@ def diff(ATTname, TOOLname, Removable, Build, Difference):
             elif boolean == 1:
                 continue
             elif boolean == 0:
-                Difference.write(TOOLline+"\n")
+                Difference.write(TOOLline + "\n")
             else:
                 print("Något är stört")
         ATTNew.close()
         TOOLNew.close()
 
+
 def BuildList():
-    ATT = open("BuilderQuest.txt", "r")
+    ATT = open("BuilderQuest.txt")
     Buildlist = []
     for line in ATT.readlines():
         try:
-            line = re.sub('[^0-9]+^.','', line)
-            line = line.strip('\n')
+            line = re.sub("[^0-9]+^.", "", line)
+            line = line.strip("\n")
             Buildlist.append(line)
         except:
             continue
     Buildlist.reverse()
     return Buildlist
-
 
 
 def main():
@@ -149,10 +153,11 @@ def main():
         diff(ATTname, TOOLname, Removable, Build, Difference)
         Difference.close()
 
+
 def CheckAgain(Checkagain):
     ATTname = OpenAndStripLineATTFile("Categories")
-    ATT = open(ATTname, "r")
-    TOOL = open(Checkagain, "r")
+    ATT = open(ATTname)
+    TOOL = open(Checkagain)
     Diff = open("diff.txt", "w")
     TOOlr = TOOL.readlines()
     ATTr = ATT.readlines()
@@ -161,13 +166,14 @@ def CheckAgain(Checkagain):
         for ATTline in ATTr:
             ATTline = ATTline.strip()
             if TOOLline == ATTline:
-                Diff.write(TOOLline+"\n")
+                Diff.write(TOOLline + "\n")
+
 
 def OpenAndStripLineMissing(name):
     data_folder = "C:\\Program Files (x86)\\World of Warcraft\\_retail_\\Interface\\AddOns\\AllTheThings\\.contrib\\Parser\\DATAS\\00 - Item Database\\"
-    path = data_folder + name+".lua"
-    ATT = open(path, "r")
-    newname = "New"+name+".txt"
+    path = data_folder + name + ".lua"
+    ATT = open(path)
+    newname = "New" + name + ".txt"
     ATTNew = open(newname, "w")
     for line in ATT.readlines():
         line = line.split(",")
@@ -175,20 +181,21 @@ def OpenAndStripLineMissing(name):
             try:
                 if element.find("q(") != -1:
                     element = re.sub("[^0-9^.]", "", element)
-                    ATTNew.write(element+"\n")
+                    ATTNew.write(element + "\n")
                 elif element.find("questID") != -1:
                     element = re.sub("[^0-9^.]", "", element)
-                    ATTNew.write(element+"\n")
+                    ATTNew.write(element + "\n")
             except:
                 continue
     ATTNew.close()
     return newname
 
+
 def CheckMissing():
     ATTname = OpenAndStripLineATTFile("Categories")
-    ATT = open(ATTname, "r")
+    ATT = open(ATTname)
     TOOLname = OpenAndStripLineMissing("MissingQuests")
-    TOOL = open(TOOLname, "r")
+    TOOL = open(TOOLname)
     DiffMissing = open("diff.txt", "w")
     TOOlr = TOOL.readlines()
     ATTr = ATT.readlines()
@@ -197,5 +204,7 @@ def CheckMissing():
         for ATTline in ATTr:
             ATTline = ATTline.strip()
             if TOOLline == ATTline:
-                DiffMissing.write(TOOLline+"\n")
+                DiffMissing.write(TOOLline + "\n")
+
+
 CheckMissing()
