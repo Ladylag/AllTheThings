@@ -154,6 +154,9 @@ def main():
         Difference.close()
 
 
+main()
+
+
 def CheckAgain(Checkagain):
     ATTname = OpenAndStripLineATTFile("Categories")
     ATT = open(ATTname)
