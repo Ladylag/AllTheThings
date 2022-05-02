@@ -6,6 +6,7 @@ DB_FILE = "db/Categories.lua"
 BUILDS_FILE = ".contrib/Harvesters/builds.txt"
 USED_QUESTS_FILE = "quest_ids.txt"
 BUILD_QUESTS_FILE = "build_quests.txt"
+DIFF_FILE = "diff.txt"
 
 
 def get_used_quest_ids() -> None:
@@ -33,33 +34,31 @@ def get_build_quests(build: str) -> None:
         build_quests_file.write("\n")
 
 
-def diff(used_quests_path: str, build: str, diff_path: str) -> None:
+def build_diff(build: str) -> None:
     with (
-        open(used_quests_path) as used_quests_file,
+        open(USED_QUESTS_FILE) as used_quests_file,
         open(BUILD_QUESTS_FILE) as build_quests_file,
-        open(diff_path) as diff_file,
+        open(DIFF_FILE) as diff_file,
     ):
         used_quests = set(used_quests_file.read().splitlines())
         build_quests = set(build_quests_file.read().splitlines())
         diff_stuff = set(diff_file.read().splitlines())
-        difference = build_quests - used_quests - diff_stuff
+    difference = build_quests - used_quests - diff_stuff
     if difference:
-        with open(diff_path, "a") as diff_file:
+        with open(DIFF_FILE, "a") as diff_file:
             diff_file.write(build + "\n")
             diff_file.write("\n".join(sorted(difference, key=int)))
             diff_file.write("\n")
 
 
-def main():
+def main() -> None:
     get_used_quest_ids()
-    Removable = []  ##Divine Steeds + Extra
-    Difference = open("Difference.txt", "w")
-    Difference.close()
+    open(DIFF_FILE, "w").close()
     build_list = open(BUILDS_FILE).read().splitlines()
-    for Build in reversed(build_list):
-        print(Build)
-        get_build_quests(Build)
-        diff(USED_QUESTS_FILE, Build, "Difference.txt")
+    for build in reversed(build_list):
+        print(build)
+        get_build_quests(build)
+        build_diff(build)
 
 
 main()
