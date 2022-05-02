@@ -4,6 +4,8 @@ import re
 
 import requests
 
+DB_FILE = "db/Categories.lua"
+
 
 def FileEmpty(name):
     with open(name) as my_file:
@@ -15,9 +17,7 @@ def FileEmpty(name):
 
 
 def OpenAndStripLineATTFile(name):
-    data_folder = "C:\\Program Files (x86)\\World of Warcraft\\_retail_\\Interface\\AddOns\\AllTheThings\\db\\"
-    path = data_folder + name + ".lua"
-    ATT = open(path)
+    ATT = open(DB_FILE)
     newname = "New" + name + ".txt"
     ATTNew = open(newname, "w")
     for line in ATT.readlines():
