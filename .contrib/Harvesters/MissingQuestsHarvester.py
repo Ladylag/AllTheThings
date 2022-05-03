@@ -1,7 +1,7 @@
+import os
 import re
 
 import requests
-import os
 
 DB_FILE = "db/Categories.lua"
 BUILDS_FILE = ".contrib/Harvesters/builds.txt"
