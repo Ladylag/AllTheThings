@@ -44,7 +44,7 @@ async def get_localized_obj_name_flavor(
     obj_id: int,
     lang_code: LangCode = LangCode.ENGLISH,
     game_flavor: GameFlavor = GameFlavor.RETAIL,
-):
+) -> str:
     url = "https://"
     if lang_code != LangCode.ENGLISH:
         url += f"{lang_code.value}."
@@ -98,8 +98,8 @@ async def get_localized_obj_name(
     return localized_obj_name, game_flavor
 
 
-def get_todo_lines(lines: list[str]):
-    todo_dict: dict[int, int] = {}
+def get_todo_lines(lines: list[str]) -> dict[int, int]:
+    todo_dict = dict[int, int]()
     for ind, line in enumerate(lines):
         if "ObjectNames" in line:
             # logging.info(f"Found beginning at line {ind + 2}!")
@@ -129,8 +129,8 @@ async def attach_line_ind(
 
 async def get_localized_names(
     session: ClientSession, todo_dict: dict[int, int], lang_code: LangCode
-):
-    localized_dict: dict[int, tuple[str, GameFlavor]] = {}
+) -> dict[int, tuple[str, GameFlavor]]:
+    localized_dict = dict[int, tuple[str, GameFlavor]]()
     localized_objects = await asyncio.gather(
         *[
             attach_line_ind(
@@ -154,10 +154,10 @@ async def localize_objects(
     filename: str,
     lang_code: LangCode,
     original_obj_names: dict[int, str] = {},
-):
+) -> dict[int, str]:
     logging.info(f"Starting {lang_code}!")
-    file = open(filename)
-    lines = file.readlines()
+    with open(filename) as f:
+        lines = f.readlines()
 
     todo_dict = get_todo_lines(lines)
 
@@ -191,12 +191,12 @@ async def localize_objects(
     return original_obj_names
 
 
-def sort_objects(filename: str):
-    file = open(filename)
-    lines = file.readlines()
+def sort_objects(filename: str) -> None:
+    with open(filename) as file:
+        lines = file.readlines()
     lines_copy = lines.copy()
 
-    todo_dict: dict[int, int] = {}
+    todo_dict = dict[int, int]()
     first_obj_line = -1
     last_obj_line = -1
     for ind, line in enumerate(lines):
@@ -255,13 +255,12 @@ class ObjectsInfo(NamedTuple):
     last_line: int
 
 
-async def get_objects_info(session: ClientSession, filename: str):
+async def get_objects_info(session: ClientSession, filename: str) -> ObjectsInfo:
     sort_objects(filename)
-    file = open(filename)
-    lines = file.readlines()
-    file.close()
+    with open(filename) as file:
+        lines = file.readlines()
 
-    objects: list[Object] = []
+    objects = list[Object]()
     first_obj_line = 0
     last_obj_line = 0
     for ind, line in enumerate(lines):
@@ -304,9 +303,8 @@ async def get_objects_info(session: ClientSession, filename: str):
     # replace all lines because we might have localized new objects
     localized_obj_lines = [i.line for i in objects]
     lines[first_obj_line : last_obj_line + 1] = localized_obj_lines
-    file = open(filename, "w")
-    file.writelines(lines)
-    file.close()
+    with open(filename, "w") as file:
+        file.writelines(lines)
 
     objects = [obj for obj in objects if obj.name != "GetSpellInfo"]
 
@@ -315,7 +313,7 @@ async def get_objects_info(session: ClientSession, filename: str):
 
 async def get_new_object_line(
     session: ClientSession, obj_id: int, obj_name: str, lang_code: LangCode
-):
+) -> str:
     logging.info(f"New object {obj_id}: {obj_name}")
 
     localized_obj_name, game_flavor = await get_localized_obj_name(
@@ -341,7 +339,7 @@ async def get_new_object_line(
 
 async def sync_objects(
     session: ClientSession, objects: list[Object], filename: str, lang_code: LangCode
-):
+) -> None:
     logging.info(f"Syncing {lang_code}!")
     localized_objects, first_obj_line, last_obj_line = await get_objects_info(
         session, filename
@@ -379,11 +377,9 @@ async def sync_objects(
             logging.info(del_obj)
         del localized_objects[localized_ind:]
 
-    f = open(filename)
-    contents = f.readlines()
-    f.close()
+    with open(filename) as f:
+        contents = f.readlines()
     localized_obj_lines = [i.line for i in localized_objects]
     contents[first_obj_line : last_obj_line + 1] = localized_obj_lines
-    f = open(filename, "w")
-    f.writelines(contents)
-    f.close()
+    with open(filename, "w") as f:
+        f.writelines(contents)
