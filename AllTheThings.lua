@@ -21121,7 +21121,6 @@ customWindowUpdates["quests"] = function(self, force, got)
 					return true;
 				end
 			end
-			end;
 		end
 		local partition, partitionStart, partitionGroups;
 		local dlo = app.DelayLoadedObject;
