@@ -1373,6 +1373,143 @@ function app:TakeScreenShot()
 	end
 end
 
+ssFrame = CreateFrame("Frame",nil,UIParent)
+ssFrame:Hide()
+
+sophieGains = {}
+
+function app:AddGains(name, amount, start)
+	if sophieGains[name] then
+		sophieGains[name].amount = sophieGains[name].amount + amount
+	else 
+		local newGains = {}
+		newGains["name"] = name
+		newGains["amount"] = amount
+		newGains["start"] = start
+		tinsert(sophieGains, newGains)
+		sophieGains[name] = newGains
+	end
+	
+	app:ShowGains()
+end
+
+function app:ShowGains()
+	if ssFrame:IsVisible() then
+		return
+	end
+	local gainTable = nil
+	if sophieGains[1] then
+		gainTable = table.remove(sophieGains, 1)
+	end
+	if gainTable == nil then
+		return
+	end
+	local name, amount, start = gainTable.name, gainTable.amount, gainTable.start
+	sophieGains[name] = nil
+
+	fillHeight = 90
+	
+	ssFrame = CreateFrame("Frame",nil,UIParent)
+	ssFrame:SetFrameStrata("BACKGROUND")
+	ssFrame:SetWidth(120) 
+	ssFrame:SetHeight(120) 
+	ssFrame:SetPoint("CENTER", 150, -50)
+	ssFrame:Hide()
+	
+	local vialTexture = ssFrame:CreateTexture(nil, 'BACKGROUND')
+	vialTexture:SetPoint("Center")
+	vialTexture:SetSize(1,1)
+	vialTexture:SetTexture('Interface\\AddOns\\AllTheThings\\assets\\trapezoid')
+	vialTexture:SetVertexColor(0.35,0.35,0.35, 0.75)
+	
+	ssFrame.texture = ssFrame:CreateTexture(nil, 'ARTWORK')
+	ssFrame.texture:SetTexture('Interface\\AddOns\\AllTheThings\\assets\\trapezoid')
+	ssFrame.texture:SetPoint("BOTTOM", ssFrame, 0, 6)
+	ssFrame.texture:SetSize(105, 110)	
+	ssFrame.mask = ssFrame:CreateMaskTexture()
+	ssFrame.mask:SetTexture("Interface/CHARACTERFRAME/TempPortraitAlphaMask", "CLAMPTOBLACKADDITIVE", "CLAMPTOBLACKADDITIVE")
+	ssFrame.mask:SetPoint("CENTER", 0, 15)
+	ssFrame.mask:SetHeight(350)
+	ssFrame.mask:SetWidth(650)
+	ssFrame.texture:AddMaskTexture(ssFrame.mask)
+	
+	local nameText = ssFrame:CreateFontString(nil,"ARTWORK", "GameFontNormal")
+	nameText:SetPoint("TOP", ssFrame, 0, 20)
+	nameText:SetJustifyH("CENTER")
+	nameText:SetJustifyV("TOP")
+	nameText:SetTextColor(1,0.4,0,1)
+	nameText:SetTextScale(1.3)
+	nameText:SetText(name)
+	nameText:Hide()
+	
+	local totalText = ssFrame:CreateFontString(nil,"ARTWORK", "GameFontNormal")
+	totalText:SetPoint("BOTTOM", ssFrame, 0, 10)
+	totalText:SetJustifyH("CENTER")
+	totalText:SetJustifyV("TOP")
+	totalText:SetTextColor(1,0.4,0,1)
+	totalText:SetTextScale(1.1)
+	totalText:SetText(string.format('%02.2f', start) .. "%")
+	totalText:Hide()
+	
+	local amountGainedText = ssFrame:CreateFontString(nil,"ARTWORK", "GameFontNormal")
+	amountGainedText:SetPoint("BOTTOM", ssFrame, 0, 90)
+	amountGainedText:SetJustifyH("CENTER")
+	amountGainedText:SetJustifyV("TOP")
+	amountGainedText:SetTextColor(1,0.4,0,1)
+	amountGainedText:SetTextScale(0.9)
+	amountGainedText:SetText(string.format('%02.2f', amount))
+	amountGainedText:Hide()
+	
+	ssFrame.mask:SetPoint("BOTTOM", 0, -344)
+	ssFrame.texture:SetVertexColor(0,0,0,0.8)
+	nameText:SetTextColor(0,0,0)
+	
+	local animationGroup = ssFrame:CreateAnimationGroup()
+	
+	local scaleUp = animationGroup:CreateAnimation("Animation")
+	scaleUp:SetDuration(0.5)
+	scaleUp:SetOrder(1)
+	scaleUp:SetScript("OnUpdate", function()
+		vialTexture:SetSize(ssFrame:GetWidth() * (scaleUp:GetProgress() + 0.01), ssFrame:GetHeight() * (scaleUp:GetProgress() + 0.01))
+	end)
+	scaleUp:SetScript("OnFinished", function() amountGainedText:Show(); totalText:Show(); nameText:Show() end)
+	
+	local fillUp = animationGroup:CreateAnimation("Animation")
+	fillUp:SetDuration(2)
+	fillUp:SetStartDelay(1)
+	fillUp:SetOrder(2)
+	fillUp:SetScript("OnUpdate", function() 
+		totalText:SetText(string.format('%02.2f', start + (amount * fillUp:GetProgress())) .. "%");
+		amountGainedText:SetText("+" .. string.format('%02.2f', amount * (1 - fillUp:GetProgress())) .. "%");
+		local fillAmount = amount
+		if (fillAmount < 2) then
+			fillAmount = 2
+		end
+		ssFrame.mask:SetPoint("BOTTOM", 0, (fillAmount * fillUp:GetProgress() * 1.1) - 344 + start)
+		ssFrame.texture:SetVertexColor(((start + (fillAmount * fillUp:GetProgress())) / 100) / 3, ((start + (fillAmount * fillUp:GetProgress())) / 100) / 1.4, ((start + (fillAmount * fillUp:GetProgress())) / 100) / 1.1, 0.8)
+		nameText:SetTextColor(((fillUp:GetProgress() * 0.5) + 0.5) * 0.9,((fillUp:GetProgress() * 0.5) + 0.5) * 0.8,((fillUp:GetProgress() * 0.5) + 0.5) * 0.6)
+	end)
+	
+	local amountFadeOut = animationGroup:CreateAnimation("Animation")
+	amountFadeOut:SetOrder(3)
+	amountFadeOut:SetDuration(0.75)
+	amountFadeOut:SetScript("OnUpdate", function() amountGainedText:SetAlpha(1 - amountFadeOut:GetProgress()) end)
+	amountFadeOut:SetScript("OnFinished", function() amountGainedText:Hide()	 end)
+	
+	local fadeOut = animationGroup:CreateAnimation("Alpha")
+	fadeOut:SetToAlpha(0)
+	fadeOut:SetFromAlpha(1)
+	fadeOut:SetStartDelay(2)
+	fadeOut:SetOrder(4)
+	fadeOut:SetDuration(1)
+	fadeOut:SetEndDelay(1)
+	fadeOut:SetScript("OnFinished", function() ssFrame:Hide(); app:ShowGains() end)
+	
+	ssFrame:Show()
+	animationGroup:Play()
+	
+end
+
 -- audio lib
 app.SoundDelays = {};
 function app:PlayCompleteSound()
@@ -6187,6 +6324,46 @@ local function SearchForMissingItems(group)
 	SearchForMissingItemsRecursively(group, listing);
 	return listing;
 end
+
+local function IsSpecialGroup(name)
+	if name then
+		if name == "World Drop" then
+			return true
+		end
+		if name == "Group Finder" then
+			return true
+		end
+		if name == "Achievements" then
+			return true
+		end
+		if name == "Pet Battles" then
+			return true
+		end
+		if name == "PvP" then
+			return true
+		end
+		if name == "Professions" then
+			return true
+		end
+		if name == "Flight Paths" then
+			return true
+		end
+		if name == "Battle Pets" then
+			return true
+		end
+		if name == "Mounts" then
+			return true
+		end
+		if name == "Titles" then
+			return true
+		end
+		if name == "Toy Box" then
+			return true
+		end
+	end
+	return false
+end
+
 local function SearchForMissingItemNames(group)
 	-- Auctionator needs unique Item Names. Nothing else.
 	local uniqueNames = {};
@@ -6214,7 +6391,43 @@ local function UpdateSearchResults(searchResults)
 			hashes[result.hash] = true;
 			tinsert(found, result);
 		end
-
+		local specialNode = nil
+		for _,result in ipairs(found) do
+			local sophieNode = result
+			local mapNode = nil
+			while sophieNode.parent do
+				sophieNode = sophieNode.parent
+				if sophieNode.mapID then
+					info = C_Map.GetMapInfo(sophieNode.mapID)
+					if info.mapType == 3 or info.mapType == 4 then
+						mapNode = sophieNode
+					end
+				end
+			end
+			local sophieNode = result
+			while sophieNode.parent do
+				sophieNode = sophieNode.parent
+				if IsSpecialGroup(sophieNode.name) then
+					if specialNode and specialNode.total and specialNode.total < sophieNode.total then
+						specialNode = sophieNode
+					elseif not specialNode then
+						specialNode = sophieNode
+					end
+				end
+			end
+			if mapNode and mapNode.total and mapNode.total > 0 then
+				gainAmount = (1 / mapNode.total) * 100
+				startAmount = (mapNode.progress / mapNode.total) * 100
+				app:AddGains(mapNode.name, gainAmount, startAmount)
+				print("Discovery! " .. mapNode.name .. " +" .. string.format('%02.2f', gainAmount) .. "%" .. " -> " .. string.format('%02.2f', startAmount + gainAmount) .. "%")
+			end
+		end
+		if specialNode and specialNode.total and specialNode.total > 0 then
+			gainAmount = (1 / specialNode.total) * 100
+			startAmount = (specialNode.progress / specialNode.total) * 100
+			app:AddGains(specialNode.name, gainAmount, startAmount)
+			print("Discovery! " .. specialNode.name .. " +" .. string.format('%02.2f', gainAmount) .. "%" .. " -> " .. string.format('%02.2f', startAmount + gainAmount) .. "%")
+		end
 		-- loop through visible ATT windows and collect matching groups
 		-- app.PrintDebug("Checking Windows...")
 		for suffix,window in pairs(app.Windows) do
@@ -20908,6 +21121,7 @@ customWindowUpdates["quests"] = function(self, force, got)
 					return true;
 				end
 			end
+			end;
 		end
 		local partition, partitionStart, partitionGroups;
 		local dlo = app.DelayLoadedObject;
