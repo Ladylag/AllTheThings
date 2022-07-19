@@ -6450,6 +6450,7 @@ local function UpdateSearchResults(searchResults)
 	-- app.PrintDebug("UpdateSearchResults Done")
 end
 -- Pulls the field search results for the rawID's and passes the results into UpdateSearchResults
+app.UpdateSearchResults = UpdateSearchResults
 local function UpdateRawIDs(field, ids)
 	-- print("UpdateRawIDs",field,ids and #ids)
 	if ids and #ids > 0 then
